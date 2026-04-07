@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>焼きばめ計算アプリ（完全版）</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>焼きばめ計算アプリ（完全版・異材質＋キー強度対応）</h2>
+
+<div class="container">
+
+  <!-- 左側：入力欄 -->
+  <div class="block">
+    <h3>入力</h3>
+
+    <label>軸径 d (mm)</label>
+    <input id="d" type="number" step="0.01" value="60" oninput="autoKey()">
+
+    <label>穴径 D (mm)</label>
+    <input id="D" type="number" step="0.01" value="59.95">
+
+    <label>ハブ外径 Do (mm)</label>
+    <input id="Do" type="number" step="0.1" value="75">
+
+    <label>はめあい長さ L (mm)</label>
+    <input id="L" type="number" step="0.1" value="70">
+
+    <hr>
+
+    <h3>材質（軸）</h3>
+
+    <label>軸のヤング率 E_shaft (MPa)</label>
+    <input id="E_shaft" type="number" step="1000" value="210000" oninput="suggestMu()">
+
+    <label>軸の熱膨張係数 α_shaft (/K)</label>
+    <input id="alpha_shaft" type="number" step="0.0000001" value="0.0000118" oninput="suggestMu()">
+
+    <hr>
+
+    <h3>材質（ハブ）</h3>
+
+    <label>ハブのヤング率 E_hub (MPa)</label>
+    <input id="E_hub" type="number" step="1000" value="210000" oninput="suggestMu()">
+
+    <label>ハブの熱膨張係数 α_hub (/K)</label>
+    <input id="alpha_hub" type="number" step="0.0000001" value="0.0000118" oninput="suggestMu()">
+
+    <details>
+      <summary>代表的な材料の物性値一覧</summary>
+      <table class="list">
+        <tr><th>材料</th><th>E (MPa)</th><th>α (/K)</th></tr>
+        <tr><td>S45C</td><td>210000</td><td>0.0000118</td></tr>
+        <tr><td>SUS304</td><td>193000</td><td>0.0000173</td></tr>
+        <tr><td>A5052</td><td>70000</td><td>0.0000230</td></tr>
+        <tr><td>銅</td><td>110000</td><td>0.0000165</td></tr>
+        <tr><td>真鍮</td><td>100000</td><td>0.0000190</td></tr>
+      </table>
+    </details>
+
+    <hr>
+
+    <label>摩擦係数 μ</label>
+    <input id="mu" type="number" step="0.01" value="0.15">
+
+    <p id="mu_suggest" style="margin-top:5px; font-size:14px; color:#333;">
+      推奨 μ：-
+    </p>
+    <button onclick="setMu()" style="margin-top:5px;">推奨値をセット</button>
+
+    <details>
+      <summary>代表的な摩擦係数 μ 一覧</summary>
+      <table class="list">
+        <tr><th>材料組み合わせ</th><th>μ</th></tr>
+        <tr><td>鋼 × 鋼（乾燥）</td><td>0.12〜0.20</td></tr>
+        <tr><td>鋼 × SUS304</td><td>0.20〜0.30</td></tr>
+        <tr><td>鋼 × アルミ</td><td>0.30〜0.45</td></tr>
+        <tr><td>鋼 × 真鍮</td><td>0.25〜0.35</td></tr>
+        <tr><td>鋼 × 鋼（油膜）</td><td>0.05〜0.10</td></tr>
+      </table>
+    </details>
+
+    <hr>
+
+    <h3>キー（JIS 平行キー）</h3>
+
+    <label>キー幅 b (mm)</label>
+    <input id="key_b" type="number" step="0.1" value="16">
+
+    <label>キー高さ h (mm)</label>
+    <input id="key_h" type="number" step="0.1" value="10">
+
+    <label>軸側キー溝深さ t (mm)</label>
+    <input id="key_t" type="number" step="0.1" value="4.9">
+
+    <p id="key_info" style="font-size:14px; margin-top:5px;">キー補正係数：-</p>
+
+    <hr>
+
+    <label>常温 (℃)</label>
+    <input id="Troom" type="number" step="1" value="20">
+
+    <label>モーター出力 P (kW)</label>
+    <input id="P" type="number" step="0.1" value="5">
+
+    <label>回転数 n (rpm)</label>
+    <input id="n" type="number" step="1" value="1450">
+
+    <button onclick="calc()">計算する</button>
+  </div>
+
+  <!-- 右側：結果 -->
+  <div class="result">
+    <h3>計算結果</h3>
+
+    <p>しめしろ δ：<span id="delta">-</span> mm</p>
+    <p>必要加熱温度（ハブ側）：<span id="Theat">-</span> ℃</p>
+    <p>面圧 p：<span id="p">-</span> MPa</p>
+
+    <hr>
+
+    <h3>トルク計算</h3>
+    <p>焼きばめ摩擦トルク（補正前）：<span id="T_raw">-</span> N·m</p>
+    <p>キー補正係数 k_key：<span id="k_key">-</span></p>
+    <p>焼きばめ摩擦トルク（補正後）：<span id="T_press">-</span> N·m</p>
+
+    <p>キーせん断トルク：<span id="T_shear">-</span> N·m</p>
+    <p>キー押しつぶしトルク：<span id="T_crush">-</span> N·m</p>
+
+    <hr>
+
+    <p>必要トルク（機器側）：<span id="Treq">-</span> N·m</p>
+    <p>最終伝達可能トルク：<span id="T_final">-</span> N·m</p>
+    <p>安全率：<span id="SF">-</span></p>
+    <p>判定：<span id="judge" class="judge">-</span></p>
+
+    <details>
+      <summary>計算式を表示</summary>
+      <p>δ = d − D</p>
+      <p>ΔT = δ / (α_hub d)</p>
+      <p>p = δ / (Di/E_s + Di/E_h × (Do² + Di²)/(Do² − Di²))</p>
+      <p>T_press = μ p π d L (d/2)</p>
+      <p>k_key = 1 − (b t) / (π d² / 4)</p>
+      <p>T_shear = τ b L (d/2)</p>
+      <p>T_crush = σ_c t L (d/2)</p>
+      <p>T_final = min(T_press, T_shear, T_crush)</p>
+    </details>
+
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
