@@ -1,0 +1,187 @@
+body {
+  font-family: sans-serif;
+  padding: 20px;
+  background: #f7f7f7;
+  line-height: 1.5;
+}
+
+h2 {
+  margin-bottom: 15px;
+  font-size: 22px;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.block, .result {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px #ccc;
+  width: 360px;
+}
+
+.block h3, .result h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.block label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.block input, .block select {
+  width: 100%;
+  padding: 6px;
+  margin-top: 3px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  font-size: 15px;
+}
+
+.result p {
+  margin: 6px 0;
+}
+
+button, .calc-btn {
+  margin-top: 15px;
+  width: 100%;
+  padding: 10px;
+  background: #0078d7;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover, .calc-btn:hover {
+  background: #005fa3;
+}
+
+.judge {
+  font-weight篤、了解。  
+**style.css の最後が途中で切れていたので、ここで “完全版の style.css” をフルで渡すね。**  
+これで index.html / app.js / style.css の 3 ファイルがすべて揃って、アプリが完全に動作する。
+
+---
+
+# 🟦 **style.css（完全版・途中で切れない最終版）**
+
+```css
+body {
+  font-family: sans-serif;
+  padding: 20px;
+  background: #f7f7f7;
+  line-height: 1.5;
+}
+
+h2 {
+  margin-bottom: 15px;
+  font-size: 22px;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.block, .result {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px #ccc;
+  width: 360px;
+}
+
+.block h3, .result h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.block label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.block input, .block select {
+  width: 100%;
+  padding: 6px;
+  margin-top: 3px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  font-size: 15px;
+}
+
+.result p {
+  margin: 6px 0;
+}
+
+button, .calc-btn {
+  margin-top: 15px;
+  width: 100%;
+  padding: 10px;
+  background: #0078d7;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover, .calc-btn:hover {
+  background: #005fa3;
+}
+
+.judge {
+  font-weight: bold;
+  font-size: 18px;
+  color: #333;
+}
+
+.judge.ok {
+  color: #007800;
+}
+
+.judge.ng {
+  color: #c00000;
+}
+
+/* 代表的な材料・摩擦係数一覧の表 */
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.ref-table th, .ref-table td {
+  border: 1px solid #aaa;
+  padding: 6px;
+  text-align: center;
+}
+
+.ref-table th {
+  background: #e8e8e8;
+}
+
+@media (max-width: 800px) {
+  .block, .result {
+    width: 100%;
+  }
+  body {
+    padding: 10px;
+  }
+  h2 {
+    font-size: 20px;
+  }
+}

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>焼きばめ計算アプリ（Ft基準・完全版）</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>焼きばめ計算アプリ（Ft基準・異材質＋物性値一覧＋μ一覧）</h2>
+
+<div class="container">
+
+  <!-- 左側：入力欄 -->
+  <div class="block">
+    <h3>入力</h3>
+
+    <label>軸径 d (mm)</label>
+    <input id="d" type="number" step="0.01" value="60">
+
+    <label>穴径 D (mm)</label>
+    <input id="D" type="number" step="0.01" value="59.95">
+
+    <label>ハブ外径 Do (mm)</label>
+    <input id="Do" type="number" step="0.1" value="75">
+
+    <label>はめあい長さ L (mm)</label>
+    <input id="L" type="number" step="0.1" value="70">
+
+    <hr>
+
+    <h3>材質（軸）</h3>
+
+    <label>軸のヤング率 E_shaft (MPa)</label>
+    <input id="E_shaft" type="number" step="1000" value="210000" oninput="suggestMu()">
+
+    <label>軸の熱膨張係数 α_shaft (/K)</label>
+    <input id="alpha_shaft" type="number" step="0.0000001" value="0.0000118" oninput="suggestMu()">
+
+    <hr>
+
+    <h3>材質（ハブ）</h3>
+
+    <label>ハブのヤング率 E_hub (MPa)</label>
+    <input id="E_hub" type="number" step="1000" value="210000" oninput="suggestMu()">
+
+    <label>ハブの熱膨張係数 α_hub (/K)</label>
+    <input id="alpha_hub" type="number" step="0.0000001" value="0.0000118" oninput="suggestMu()">
+
+    <hr>
+
+    <!-- μ 推奨値 UI -->
+    <h3>摩擦係数</h3>
+
+    <label>摩擦係数 μ</label>
+    <input id="mu" type="number" step="0.01" value="0.15">
+
+    <p id="mu_suggest" style="margin-top:5px; font-size:14px; color:#333;">
+      推奨 μ：-
+    </p>
+
+    <button onclick="setMu()" style="margin-top:5px;">推奨値をセット</button>
+
+    <hr>
+
+    <h3>機器別の参考推奨値</h3>
+
+    <label>機器種別（参考）</label>
+    <select id="machine_type" onchange="updateRecommendations()">
+      <option value="general">一般産業機械</option>
+      <option value="motor">電動機・減速機</option>
+      <option value="compressor">コンプレッサ・油圧</option>
+      <option value="clutch">クラッチ・ブレーキ</option>
+      <option value="heavy">重負荷産業</option>
+      <option value="vehicle">自動車・建機</option>
+      <option value="highspeed">高速回転機</option>
+    </select>
+
+    <p id="rec_sf">推奨SF：-</p>
+    <p id="rec_mu">推奨μ：-</p>
+    <p id="rec_delta">推奨しめしろ：-</p>
+
+    <hr>
+
+    <label>常温 (℃)</label>
+    <input id="Troom" type="number" step="1" value="20">
+
+    <label>モーター出力 P (kW)</label>
+    <input id="P" type="number" step="0.1" value="5">
+
+    <label>回転数 n (rpm)</label>
+    <input id="n" type="number" step="1" value="1450">
+
+    <!-- 計算ボタン -->
+    <button onclick="calc()" class="calc-btn">計算する</button>
+  </div>
+
+  <!-- 右側：結果 -->
+  <div class="result">
+    <h3>計算結果</h3>
+
+    <p>しめしろ δ：<span id="delta">-</span> mm</p>
+    <p>必要加熱温度（ハブ側）：<span id="Theat">-</span> ℃</p>
+    <p>加熱時のハブ膨張量：<span id="expansion">-</span> mm</p>
+    <p>面圧 p：<span id="p">-</span> MPa</p>
+
+    <hr>
+
+    <h3>円周方向力</h3>
+    <p>伝達トルクによって生じる円周方向力 　　　　　 　　　Ft：<span id="Ft">-</span> N</p>
+    <p>はめあい部の摩擦力 Ff：<span id="Ff">-</span> N</p>
+
+    <hr>
+
+    <h3>トルク情報（参考）</h3>
+    <p>伝達トルク（機器側）：<span id="Treq">-</span> N·m</p>
+
+    <hr>
+
+    <h3>判定（Ft基準）</h3>
+    <p>安全率（参考）：<span id="SF">-</span></p>
+    <p>判定：<span id="judge" class="judge">-</span></p>
+
+    <hr>
+
+    <!-- 代表的な材料の物性値一覧 -->
+    <h3>代表的な材料の物性値一覧</h3>
+    <table class="ref-table">
+      <tr><th>材料</th><th>E (MPa)</th><th>α (/K)</th></tr>
+      <tr><td>炭素鋼（S45C）</td><td>210000</td><td>0.0000118</td></tr>
+      <tr><td>SUS304</td><td>193000</td><td>0.0000173</td></tr>
+      <tr><td>アルミ（A5052）</td><td>70000</td><td>0.0000236</td></tr>
+      <tr><td>銅（C1100）</td><td>110000</td><td>0.0000167</td></tr>
+      <tr><td>真鍮（C2801）</td><td>100000</td><td>0.0000190</td></tr>
+    </table>
+
+    <hr>
+
+    <!-- 代表的な摩擦係数 μ 一覧 -->
+    <h3>代表的な摩擦係数 μ 一覧</h3>
+    <table class="ref-table">
+      <tr><th>組み合わせ</th><th>μ（参考）</th></tr>
+      <tr><td>鋼 × 鋼</td><td>0.12〜0.18</td></tr>
+      <tr><td>鋼 × SUS304</td><td>0.20〜0.30</td></tr>
+      <tr><td>鋼 × アルミ</td><td>0.30〜0.45</td></tr>
+      <tr><td>鋼 × 真鍮</td><td>0.25〜0.35</td></tr>
+      <tr><td>一般金属同士</td><td>0.12〜0.18</td></tr>
+    </table>
+
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
